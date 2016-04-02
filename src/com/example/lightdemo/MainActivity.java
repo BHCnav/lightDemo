@@ -1,7 +1,10 @@
 package com.example.lightdemo;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -15,9 +18,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	private Switch mSwitch;
 
 	private boolean isLightOn = false;
-//	private boolean mLightOff = false;
-	
-	private String TAG = "lightDemo..";
+	// private boolean mLightOff = false;
+
+	private static String TAG = "lightDemo..";
 
 	private Camera camera;
 	Camera.Parameters params;
@@ -35,6 +38,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	private void initEvent() {
 		// TODO Auto-generated method stub
 		mImageView.setOnClickListener(this);
+
+		if (camera == null) {
+			camera = Camera.open();
+		}
 	}
 
 	private void initView() {
@@ -43,51 +50,56 @@ public class MainActivity extends Activity implements OnClickListener {
 
 	}
 
-	// Turning On flash
-	private void turnOnFlash() {
+	public static void turnLightOn(Camera mCamera) {
 
-		if (camera == null || params == null) {
+		if (mCamera == null) {
 			return;
 		}
-		params = camera.getParameters();
-		params.setFlashMode(Camera.Parameters.FLASH_MODE_TORCH);
-		camera.setParameters(params);
-		camera.startPreview();
-		// isLightOn = true;
+		Parameters parameters = mCamera.getParameters();
+		if (parameters == null) {
+			return;
+		}
+
+		// Turn on the flash
+
+		parameters.setFlashMode(Parameters.FLASH_MODE_TORCH);
+		mCamera.setParameters(parameters);
 
 	}
 
-	// Turning Off flash
-	private void turnOffFlash() {
-
-		if (camera == null || params == null) {
+	public static void turnLightOff(Camera mCamera) {
+		if (mCamera == null) {
 			return;
 		}
-		params = camera.getParameters();
-		params.setFlashMode(Camera.Parameters.FLASH_MODE_OFF);
-		camera.setParameters(params);
-		camera.stopPreview();
-		// isLightOn = false;
+		Parameters parameters = mCamera.getParameters();
+		if (parameters == null) {
+			return;
+		}
+
+		parameters.setFlashMode(Parameters.FLASH_MODE_OFF);
+		mCamera.setParameters(parameters);
+
 	}
 
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
-		
-		Log.d(TAG, "onClick: "+v.getId()+"  R.id.iv_light_show:"+R.id.iv_light_show+ isLightOn);
+
 		switch (v.getId()) {
 		case R.id.iv_light_show:
-			
+
 			if (isLightOn) {
 
-				mImageView.setBackgroundResource(R.drawable.newoff_200);
-				turnOffFlash();
+				mImageView.setImageResource(R.drawable.newoff);
+				// mImageView.postInvalidate();
+				turnLightOff(camera);
 				isLightOn = false;
 			} else {
-				mImageView.setBackgroundResource(R.drawable.newon_200);
-				turnOnFlash();
+				mImageView.setImageResource(R.drawable.newon);
+				// mImageView.postInvalidate();
+				turnLightOn(camera);
 				isLightOn = true;
-				
+
 				Log.d(TAG, "False...");
 			}
 			break;
@@ -96,6 +108,40 @@ public class MainActivity extends Activity implements OnClickListener {
 			break;
 		}
 
+	}
+
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+
+		camera.release();
+	}
+
+	@Override
+	protected void onStop() {
+		// TODO Auto-generated method stub
+		super.onStop();
+
+		Log.d(TAG, "onStop...");
+	}
+
+	@Override
+	protected void onRestart() {
+		// TODO Auto-generated method stub
+		super.onRestart();
+
+		Log.d(TAG, "onRestart...");
+	}
+
+	@Override
+	protected void onResume() {
+		// TODO Auto-generated method stub
+		super.onResume();
+		if (camera == null) {
+			camera = Camera.open();
+		}
+		Log.d(TAG, "onResume...");
 	}
 
 }

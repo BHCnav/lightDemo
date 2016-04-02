@@ -16,7 +16,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:contentDescription="@string/app_name"
-        android:src="@drawable/newoff_200" />
+        android:src="@drawable/newoff" />
 
     <Switch
         android:id="@+id/sw_flash_light"
