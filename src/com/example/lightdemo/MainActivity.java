@@ -12,11 +12,10 @@ import android.widget.Switch;
 public class MainActivity extends Activity implements OnClickListener {
 
 	private ImageView mImageView;
-
 	private Switch mSwitch;
 
 	private boolean isLightOn = false;
-	private boolean mLightOff = false;
+//	private boolean mLightOff = false;
 	
 	private String TAG = "lightDemo..";
 
