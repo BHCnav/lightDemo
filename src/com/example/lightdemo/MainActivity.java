@@ -2,13 +2,16 @@ package com.example.lightdemo;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.graphics.Color;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.util.Log;
+//import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -16,18 +19,22 @@ import android.widget.CompoundButton;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageView;
 import android.widget.Switch;
+import android.widget.TextView;
 
 public class MainActivity extends Activity implements OnClickListener,
 		OnCheckedChangeListener {
 
 	private ImageView mImageView;
 	private Switch mSwitch;
+	private TextView mTextView;
 
 	private volatile int isLightOn = 0;
 	private volatile int isFlashOn = 0;
 	// private boolean mLightOff = false;
 
-	private static String TAG = "lightDemo..";
+	// private static String TAG = "lightDemo..";
+	private SoundPool sp;// 声明一个SoundPool
+	private int music;// 定义一个整型用load（）；来设置suondID
 
 	private Camera camera;
 	Camera.Parameters params;
@@ -48,8 +55,7 @@ public class MainActivity extends Activity implements OnClickListener,
 			case MESSAGE_LIGHT_ON:
 
 				turnLightOn(camera);
-				Log.d(TAG, "False...");
-
+				// Log.d(TAG, "False...");
 				break;
 
 			case MESSAGE_FLASH_LIGHT_ON:
@@ -68,10 +74,18 @@ public class MainActivity extends Activity implements OnClickListener,
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		setContentView(R.layout.activity_main);
-		
+
 		initView();
 
 		initEvent();
+
+		intData();
+	}
+
+	private void intData() {
+		// TODO Auto-generated method stub
+		sp = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);// 第一个参数为同时播放数据流的最大个数，第二数据流类型，第三为声音质量
+		music = sp.load(this, R.raw.lightbuttonsound, 1); // 把你的声音素材放到res/raw里，第2个参数即为资源文件，第3个为音乐的优先级
 	}
 
 	private void initEvent() {
@@ -87,6 +101,8 @@ public class MainActivity extends Activity implements OnClickListener,
 	private void initView() {
 		mImageView = (ImageView) findViewById(R.id.iv_light_show);
 		mSwitch = (Switch) findViewById(R.id.sw_flash_light);
+
+		mTextView = (TextView) findViewById(R.id.tv_nava);
 
 	}
 
@@ -124,6 +140,7 @@ public class MainActivity extends Activity implements OnClickListener,
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
+		sp.play(music, 1, 1, 0, 0, 1);
 		switch (v.getId()) {
 		case R.id.iv_light_show:
 
@@ -133,7 +150,7 @@ public class MainActivity extends Activity implements OnClickListener,
 				// mImageView.postInvalidate();
 				if (mHandler != null) {
 					isLightOn = 0;
-
+					mTextView.setTextColor(Color.BLACK);
 					mHandler.sendEmptyMessage(MESSAGE_LIGHT_OFF);
 				}
 			} else {
@@ -141,7 +158,7 @@ public class MainActivity extends Activity implements OnClickListener,
 
 				if (mHandler != null) {
 					isLightOn = 1;
-
+					mTextView.setTextColor(Color.WHITE);
 					if (isFlashOn == 1) {
 						mHandler.sendEmptyMessage(MESSAGE_FLASH_LIGHT_ON);
 					} else {
@@ -152,7 +169,7 @@ public class MainActivity extends Activity implements OnClickListener,
 
 				}
 
-				Log.d(TAG, "False...");
+				// Log.d(TAG, "False...");
 			}
 			break;
 
@@ -168,6 +185,8 @@ public class MainActivity extends Activity implements OnClickListener,
 		super.onDestroy();
 
 		camera.release();
+		sp.release();// Release SoundPoll
+
 	}
 
 	@Override
@@ -175,7 +194,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		// TODO Auto-generated method stub
 		super.onStop();
 
-		Log.d(TAG, "onStop...");
+		// Log.d(TAG, "onStop...");
 	}
 
 	@Override
@@ -183,7 +202,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		// TODO Auto-generated method stub
 		super.onRestart();
 
-		Log.d(TAG, "onRestart...");
+		// Log.d(TAG, "onRestart...");
 	}
 
 	@Override
@@ -193,7 +212,7 @@ public class MainActivity extends Activity implements OnClickListener,
 		if (camera == null) {
 			camera = Camera.open();
 		}
-		Log.d(TAG, "onResume...");
+		// Log.d(TAG, "onResume...");
 	}
 
 	@Override

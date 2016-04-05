@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@+id/iv_light_show"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:contentDescription="@string/app_name"
@@ -27,5 +27,17 @@
         android:layout_marginBottom="52dp"
         android:text="@string/flash_light"
         android:textColor="@color/colorAccent" />
+
+    <TextView
+        android:id="@+id/tv_nava"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:text="@string/nava"
+        android:textColor="@color/black"
+        android:textSize="28sp"
+        android:textStyle="bold" />
 
 </RelativeLayout>
