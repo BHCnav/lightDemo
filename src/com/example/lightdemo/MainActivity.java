@@ -34,7 +34,7 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	// private static String TAG = "lightDemo..";
 	private SoundPool sp;// 声明一个SoundPool
-	private int music;// 定义一个整型用load（）；来设置suondID
+	private int music;// 定义一个整型用load,来设置suondID
 
 	private Camera camera;
 	Camera.Parameters params;
