@@ -2,6 +2,7 @@ package com.example.lightdemo;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Color;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -11,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
+import android.util.Log;
 //import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -32,9 +35,9 @@ public class MainActivity extends Activity implements OnClickListener,
 	private volatile int isFlashOn = 0;
 	// private boolean mLightOff = false;
 
-	// private static String TAG = "lightDemo..";
-	private SoundPool sp;// ÉùÃ÷Ò»¸öSoundPool
-	private int music;// ¶¨ÒåÒ»¸öÕûÐÍÓÃload,À´ÉèÖÃsuondID
+	private static String TAG = "lightDemo..";
+	private SoundPool sp;//
+	private int music;//
 
 	private Camera camera;
 	Camera.Parameters params;
@@ -42,6 +45,8 @@ public class MainActivity extends Activity implements OnClickListener,
 	private final int MESSAGE_LIGHT_OFF = 0;
 	private final int MESSAGE_LIGHT_ON = 1;
 	private final int MESSAGE_FLASH_LIGHT_ON = 3;
+
+	private LightDemoWakeLock mLightDemoWakeLock = null;
 
 	@SuppressLint("HandlerLeak")
 	Handler mHandler = new Handler() {
@@ -84,8 +89,11 @@ public class MainActivity extends Activity implements OnClickListener,
 
 	private void intData() {
 		// TODO Auto-generated method stub
-		sp = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);// µÚÒ»¸ö²ÎÊýÎªÍ¬Ê±²¥·ÅÊý¾ÝÁ÷µÄ×î´ó¸öÊý£¬µÚ¶þÊý¾ÝÁ÷ÀàÐÍ£¬µÚÈýÎªÉùÒôÖÊÁ¿
-		music = sp.load(this, R.raw.lightbuttonsound, 1); // °ÑÄãµÄÉùÒôËØ²Ä·Åµ½res/rawÀï£¬µÚ2¸ö²ÎÊý¼´Îª×ÊÔ´ÎÄ¼þ£¬µÚ3¸öÎªÒôÀÖµÄÓÅÏÈ¼¶
+		sp = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);//
+		music = sp.load(this, R.raw.lightbuttonsound, 1); //
+
+		mLightDemoWakeLock = new LightDemoWakeLock(); // get power control
+		mLightDemoWakeLock.acquireCpuWakeLock(this);
 	}
 
 	private void initEvent() {
@@ -182,10 +190,14 @@ public class MainActivity extends Activity implements OnClickListener,
 	@Override
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
+
 		super.onDestroy();
 
 		camera.release();
 		sp.release();// Release SoundPoll
+		mLightDemoWakeLock.releaseCpuWakeLock();
+
+		android.os.Process.killProcess(android.os.Process.myPid());
 
 	}
 
@@ -200,6 +212,12 @@ public class MainActivity extends Activity implements OnClickListener,
 	@Override
 	protected void onRestart() {
 		// TODO Auto-generated method stub
+
+		if (null != mLightDemoWakeLock) {
+			mLightDemoWakeLock.acquireCpuWakeLock(this);
+		} else {
+			Log.d(TAG, "mLightDemoWakeLock is null");
+		}
 		super.onRestart();
 
 		// Log.d(TAG, "onRestart...");
@@ -248,6 +266,44 @@ public class MainActivity extends Activity implements OnClickListener,
 			return null;
 		}
 
+	}
+
+	// (1) é¦–å…ˆå®šä¹‰SmartMapWakeLockç±»
+	class LightDemoWakeLock {
+
+		private PowerManager.WakeLock mCpuWakeLock = null;
+
+		/**
+		 * Acquire CPU wake lock
+		 * 
+		 * @param context
+		 *            Getting lock context
+		 */
+		void acquireCpuWakeLock(Context context) {
+			// Log.v(TAG, "Acquiring cpu wake lock");
+			if (mCpuWakeLock != null) {
+				return;
+			}
+
+			PowerManager pm = (PowerManager) context
+					.getSystemService(Context.POWER_SERVICE);
+
+			mCpuWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+
+			mCpuWakeLock.acquire();
+		}
+
+		/**
+		 * Release wake locks
+		 */
+
+		void releaseCpuWakeLock() {
+			// Log.v(TAG, "Releasing cpu wake lock");
+			if (mCpuWakeLock != null) {
+				mCpuWakeLock.release();
+				mCpuWakeLock = null;
+			}
+		}
 	}
 
 }
